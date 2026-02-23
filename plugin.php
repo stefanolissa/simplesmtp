@@ -3,7 +3,7 @@
 /**
  * Plugin Name: SMTP
  * Description: The lighter plugin to connect WP to an SMTP
- * Version: 0.0.2
+ * Version: 0.0.3
  * Author: Stefano Lissa
  * Author URI: https://www.satollo.net
  * License: GPL-2.0+
@@ -16,7 +16,7 @@
  */
 defined('ABSPATH') || exit;
 
-define('SMTP_VERSION', '0.0.2');
+define('SMTP_VERSION', '0.0.3');
 
 add_filter('phpmailer_init', function ($mailer) {
 
