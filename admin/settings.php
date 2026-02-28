@@ -63,6 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($error) {
         echo '<div class="notice notice-error"><p>', wp_kses_post($error), '</p></div>';
     }
+    if (!isset($settings['enabled'])) {
+        echo '<div class="notice notice-warning"><p>The SMTP is not enabled, when ready enable it.</p></div>';
+    }
     ?>
 
     <p>

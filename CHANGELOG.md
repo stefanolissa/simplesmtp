@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.0.4
+- Added notice when the SMTP is not enabled
+
 ## 0.0.3
 - Fixed the unistall procedure
 
