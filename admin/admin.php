@@ -15,15 +15,15 @@ defined('ABSPATH') || exit;
 add_action('admin_menu', function () {
 
     add_options_page(
-            'SMTP', 'SMTP', 'administrator', 'satollo-smtp',
+            'SimpleSMTP', 'SimpleSMTP', 'administrator', 'simplesmtp',
             function () {
                 include __DIR__ . '/settings.php';
             }
     );
 });
 
-add_filter('plugin_action_links_satollo-smtp/plugin.php', function ($links) {
-    $links[] = '<a href="admin.php?page=satollo-smtp">' . __('Settings') . '</a>';
+add_filter('plugin_action_links_simplesmtp/plugin.php', function ($links) {
+    $links[] = '<a href="admin.php?page=simplesmtp">' . __('Settings') . '</a>';
     return $links;
 });
 

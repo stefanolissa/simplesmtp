@@ -8,35 +8,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (isset($_POST['test'])) {
         // Globals required to communicate with hook functions
-        global $smtp_test_settings, $smtp_error;
+        global $simplesmtp_test_settings, $simplesmtp_error;
 
         // Intercept errors to display them during tests
         add_action('wp_mail_failed', function ($wp_error) {
-            global $smtp_error;
-            $smtp_error = $wp_error;
+            global $simplesmtp_error, $phpmailer;
+
+            // phpmailer has better error info than what's inside the exception
+            if (isset($phpmailer)) {
+                $simplesmtp_error = $phpmailer->ErrorInfo;
+            } else {
+                $simplesmtp_error = $wp_error->get_error_message();
+            }
         }, 0);
 
         // Overrides the mailer configuration during tests
+        remove_filter('phpmailer_init', 'simplesmtp_phpmailer_init');
         add_filter('phpmailer_init', function ($mailer) {
             global $smtp_test_settings;
 
             $mailer->IsSMTP();
-            $mailer->Host = $smtp_test_settings['host'];
-            $mailer->Port = $smtp_test_settings['port'];
-            $mailer->SMTPSecure = $smtp_test_settings['secure'];
+            $mailer->Host = $simplesmtp_test_settings['host'];
+            $mailer->Port = $simplesmtp_test_settings['port'];
+            $mailer->SMTPSecure = $simplesmtp_test_settings['secure'];
             $mailer->SMTPAutoTLS = true;
             $mailer->SMTPAuth = true;
-            $mailer->Username = $smtp_test_settings['username'];
-            $mailer->Password = $smtp_test_settings['password'];
-
+            $mailer->Username = $simplesmtp_test_settings['username'];
+            $mailer->Password = $simplesmtp_test_settings['password'];
+            if (!empty($simplesmtp_test_settings['sender_email'])) {
+                $mailer->setFrom($simplesmtp_test_settings['sender_email']);
+            }
             return $mailer;
         }, 99);
 
         $settings = wp_unslash($_POST['data']);
-        $smtp_test_settings = $settings;
+        $simplesmtp_test_settings = $settings;
         wp_mail(sanitize_email($_POST['test_email']), 'Test email from the SMTP plugin', 'This is a simple message to check the correct SMTP connection and message delivery');
-        if (isset($smtp_error)) {
-            $error = $smtp_error->get_error_message();
+        if (isset($simplesmtp_error)) {
+            $error = $simplesmtp_error;
             if (stripos($error, 'could not connect') !== false) {
                 $error .= '<br><br>This error means you need to check or change the parameters OR, worse, your hosting provider do not let your site to connect to the SMTP.';
             } elseif (stripos($error, 'timeout') !== false) {
@@ -49,11 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // TODO: Add kses, unslash, ...
         $settings = wp_unslash($_POST['data']);
 
-        update_option('smtp_settings', $settings, false);
+        update_option('simplesmtp_settings', $settings, false);
     }
 } else {
 
-    $settings = get_option('smtp_settings', []);
+    $settings = get_option('simplesmtp_settings', []);
 }
 ?>
 
@@ -69,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ?>
 
     <p>
-        <a href="https://www.satollo.net/plugins/smtp" target="_blank">Read the official page, it's short.</a>. This plugin, when uninstalled,
+        <a href="https://www.satollo.net/plugins/simplesmtp" target="_blank">Read the official page, it's short.</a>. This plugin, when uninstalled,
         does not left traces on your site.
     </p>
 
@@ -167,9 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if (WP_DEBUG) { ?>
 
         <h3>Debug</h3>
-        <p>
-            That helps me when supporting you...
-        </p>
-        <pre><?= esc_html(print_r(get_option('smtp_settings'), true)); ?></pre>
+
+        <pre><?= esc_html(print_r(get_option('simplesmtp_settings'), true)); ?></pre>
     <?php } ?>
 </div>

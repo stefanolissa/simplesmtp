@@ -2,9 +2,9 @@
 
 defined('ABSPATH') || exit;
 
-add_filter('update_plugins_satollo-smtp', function ($update, $plugin_data, $plugin_file, $locales) {
-    $slug = 'smtp';
-    $data = get_option('smtp_update_data');
+add_filter('update_plugins_satollo-simplesmtp', function ($update, $plugin_data, $plugin_file, $locales) {
+    $slug = 'simplesmtp';
+    $data = get_option($slug . '_update_data');
     if ($data && $data->updated < time() - WEEK_IN_SECONDS || isset($_GET['force-check'])) {
         $data = false;
     }
@@ -14,7 +14,7 @@ add_filter('update_plugins_satollo-smtp', function ($update, $plugin_data, $plug
         $data = json_decode(wp_remote_retrieve_body($response));
         if (is_object($data)) {
             $data->updated = time();
-            update_option('smtp_update_data', $data, false);
+            update_option($slug . '_update_data', $data, false);
         }
     }
 
@@ -23,7 +23,7 @@ add_filter('update_plugins_satollo-smtp', function ($update, $plugin_data, $plug
         $update = [
             'version' => $data->version,
             'slug' => $slug,
-            'url' => 'https://www.satollo.net/plugins/smtp',
+            'url' => 'https://www.satollo.net/plugins/' . $slug,
             'package' => 'https://www.satollo.net/repo/' . $slug . '/' . $slug . '.zip'
         ];
         return $update;
@@ -32,7 +32,7 @@ add_filter('update_plugins_satollo-smtp', function ($update, $plugin_data, $plug
     }
 }, 0, 4);
 
-function smtp_render_markdown($text) {
+function simplesmtp_render_markdown($text) {
     $text = preg_replace('/^### (.*$)/m', '<h4>$1</h4>', $text);
     $text = preg_replace('/^## (.*$)/m', '<h3>$1</h3>', $text);
     $text = preg_replace('/^# (.*$)/m', '', $text);
@@ -46,8 +46,8 @@ function smtp_render_markdown($text) {
 }
 
 add_filter('plugins_api', function ($res, $action, $args) {
-    $slug = 'smtp';
-    if ($action !== 'plugin_information' || $args->slug !== 'smtp') {
+    $slug = 'simplesmtp';
+    if ($action !== 'plugin_information' || $args->slug !== '$slug') {
         return $res;
     }
 
@@ -55,22 +55,22 @@ add_filter('plugins_api', function ($res, $action, $args) {
     $changelog = '';
     if (wp_remote_retrieve_response_code($response) == '200') {
         $changelog = wp_remote_retrieve_body($response);
-        $changelog = smtp_render_markdown($changelog);
+        $changelog = simplesmtp_render_markdown($changelog);
     }
 
     $response = wp_remote_get('https://www.satollo.net/repo/' . $slug . '/README.md');
     $readme = '';
     if (wp_remote_retrieve_response_code($response) == '200') {
         $readme = wp_remote_retrieve_body($response);
-        $readme = smtp_render_markdown($readme);
+        $readme = simplesmtp_render_markdown($readme);
     }
 
     $res = new stdClass();
-    $res->name = 'SMTP';
-    $res->slug = 'smtp';
-    $res->version = SMTP_VERSION;
+    $res->name = 'SimpleSMTP';
+    $res->slug = $slug;
+    $res->version = SIMPLESMTP_VERSION;
     $res->author = '<a href="https://www.satollo.net">Stefano Lissa</a>';
-    $res->homepage = 'https://www.satollo.net/plugins/smtp';
+    $res->homepage = 'https://www.satollo.net/plugins/' . $slug;
     $res->download_link = 'https://www.satollo.net/repo/' . $slug . '/' . $slug . '.zip';
 
     $res->sections = [

@@ -1,11 +1,11 @@
-# SMTP
+# SimpleSMTP
 
 The minimal SMTP plugin ever. Connect your blog with an SMTP service so every email
 is sent via that service.
 
 ## Install
 
-The simple installation instruction can be found in the [official page](https://www.satollo.net/plugins/smtp).
+The simple installation instruction can be found in the [official page](https://www.satollo.net/plugins/simplesmtp).
 
 ## Notes
 
